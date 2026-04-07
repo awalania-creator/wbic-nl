@@ -4,24 +4,52 @@ services:
     restart: always
     volumes:
       - /docker/wbic-nl/web-assets/clients:/usr/share/nginx/html/assets/clients:ro
+    environment:
+      # Primary canonical domain (post-migration: wbic.nl). Pre-migration still
+      # routes wbic.aiwbic.cloud via the multi-host Traefik rule below.
+      - PRIMARY_DOMAIN=${PRIMARY_DOMAIN:-wbic.nl}
+      # Cloudflare Turnstile prod sitekey. Set in /docker/wbic-nl/.env on VPS.
+      # During migration window, set this to the production sitekey
+      # (e.g. 0x4AAAAAAB7tx38e2vvqgQU8). Default keeps the test sitekey so that
+      # wbic.aiwbic.cloud keeps working until cutover.
+      - TURNSTILE_SITEKEY=${TURNSTILE_SITEKEY:-1x00000000000000000000AA}
     command:
       - /bin/sh
       - -c
       - |
+        set -eu
         cd /usr/share/nginx/html
         wget -O index.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/index.html
         wget -O diensten.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/diensten.html
         wget -O contact.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/contact.html
         wget -O algemene-voorwaarden.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/algemene-voorwaarden.html
         wget -O styles.css https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/styles.css
+        wget -O robots.txt https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/robots.txt || true
+        wget -O sitemap.xml https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/sitemap.xml || true
+        # Inject Turnstile sitekey into contact.html (replaces any data-sitekey value)
+        if [ -n "${TURNSTILE_SITEKEY}" ]; then
+          sed -i "s|data-sitekey=\"[^\"]*\"|data-sitekey=\"${TURNSTILE_SITEKEY}\"|g" contact.html
+        fi
         nginx -g 'daemon off;'
     labels:
       - traefik.enable=true
-      - "traefik.http.routers.wbic.rule=Host(`wbic.aiwbic.cloud`)"
+      # Multi-host router: serves the same container on wbic.nl, www.wbic.nl and the legacy staging host.
+      - "traefik.http.routers.wbic.rule=Host(`wbic.aiwbic.cloud`) || Host(`wbic.nl`) || Host(`www.wbic.nl`)"
       - traefik.http.routers.wbic.tls=true
       - traefik.http.routers.wbic.entrypoints=web,websecure
       - traefik.http.routers.wbic.tls.certresolver=mytlschallenge
       - traefik.http.services.wbic.loadbalancer.server.port=80
+      # www → apex redirect middleware (applied via dedicated router below)
+      - "traefik.http.middlewares.wbic-www-redirect.redirectregex.regex=^https?://www\\.wbic\\.nl/(.*)"
+      - "traefik.http.middlewares.wbic-www-redirect.redirectregex.replacement=https://wbic.nl/$${1}"
+      - "traefik.http.middlewares.wbic-www-redirect.redirectregex.permanent=true"
+      - "traefik.http.routers.wbic-www.rule=Host(`www.wbic.nl`)"
+      - traefik.http.routers.wbic-www.entrypoints=web,websecure
+      - traefik.http.routers.wbic-www.tls=true
+      - traefik.http.routers.wbic-www.tls.certresolver=mytlschallenge
+      - traefik.http.routers.wbic-www.middlewares=wbic-www-redirect
+      - traefik.http.routers.wbic-www.priority=100
+      - traefik.http.routers.wbic.priority=10
     networks:
       - n8n_default
 
@@ -30,21 +58,25 @@ services:
     restart: always
     # NOTE: Set deze env vars handmatig op de VPS in /docker/wbic-nl/.env:
     #   TURNSTILE_SECRET=...
+    #   TURNSTILE_SITEKEY=...   (prod sitekey, injected into contact.html)
     #   SMTP_HOST=smtp.example.com
     #   SMTP_PORT=587
     #   SMTP_FROM=info@wbic.nl
-    #   ALLOWED_ORIGINS=https://wbic.aiwbic.cloud,https://wbic.nl
+    #   ALLOWED_ORIGINS=https://wbic.nl,https://www.wbic.nl,https://wbic.aiwbic.cloud
+    #   PRIMARY_DOMAIN=wbic.nl
     environment:
       - PORT=3000
+      - PRIMARY_DOMAIN=${PRIMARY_DOMAIN:-wbic.nl}
       - TURNSTILE_SECRET=${TURNSTILE_SECRET:-}
       - CLOUDFLARE_TURNSTILE_SECRET=${TURNSTILE_SECRET:-}
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_FROM=${SMTP_FROM:-info@wbic.nl}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://wbic.aiwbic.cloud}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://wbic.nl,https://www.wbic.nl,https://wbic.aiwbic.cloud}
     labels:
       - traefik.enable=true
-      - "traefik.http.routers.wbic-api.rule=Host(`wbic.aiwbic.cloud`) && PathPrefix(`/api`)"
+      # API served under /api on every host the site is reachable on.
+      - "traefik.http.routers.wbic-api.rule=(Host(`wbic.aiwbic.cloud`) || Host(`wbic.nl`) || Host(`www.wbic.nl`)) && PathPrefix(`/api`)"
       - traefik.http.routers.wbic-api.entrypoints=websecure
       - traefik.http.routers.wbic-api.tls=true
       - traefik.http.routers.wbic-api.tls.certresolver=mytlschallenge
