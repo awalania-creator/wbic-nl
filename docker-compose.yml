@@ -10,6 +10,7 @@ services:
         wget -O index.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/index.html
         wget -O diensten.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/diensten.html
         wget -O contact.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/contact.html
+        wget -O algemene-voorwaarden.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/algemene-voorwaarden.html
         wget -O styles.css https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/styles.css
         nginx -g 'daemon off;'
     labels:
@@ -19,6 +20,33 @@ services:
       - traefik.http.routers.wbic.entrypoints=web,websecure
       - traefik.http.routers.wbic.tls.certresolver=mytlschallenge
       - traefik.http.services.wbic.loadbalancer.server.port=80
+    networks:
+      - n8n_default
+
+  wbic-api:
+    build: ./backend
+    restart: always
+    # NOTE: Set deze env vars handmatig op de VPS in /docker/wbic-nl/.env
+    # of via de Hostinger panel "Environment Variables" voor dit project:
+    #   TURNSTILE_SECRET=...
+    #   SMTP_HOST=smtp.example.com
+    #   SMTP_PORT=587
+    #   SMTP_FROM=info@wbic.nl
+    #   ALLOWED_ORIGINS=https://wbic.aiwbic.cloud,https://wbic.nl
+    environment:
+      - PORT=3000
+      - TURNSTILE_SECRET=${TURNSTILE_SECRET:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_FROM=${SMTP_FROM:-info@wbic.nl}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://wbic.aiwbic.cloud}
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.wbic-api.rule=Host(`wbic.aiwbic.cloud`) && PathPrefix(`/api`)"
+      - traefik.http.routers.wbic-api.entrypoints=websecure
+      - traefik.http.routers.wbic-api.tls=true
+      - traefik.http.routers.wbic-api.tls.certresolver=mytlschallenge
+      - traefik.http.services.wbic-api.loadbalancer.server.port=3000
     networks:
       - n8n_default
 
