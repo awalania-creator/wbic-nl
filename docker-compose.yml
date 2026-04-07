@@ -2,6 +2,8 @@ services:
   wbic-web:
     image: nginx:alpine
     restart: always
+    volumes:
+      - /docker/wbic-nl/web-assets/clients:/usr/share/nginx/html/assets/clients:ro
     command:
       - /bin/sh
       - -c
@@ -12,12 +14,6 @@ services:
         wget -O contact.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/contact.html
         wget -O algemene-voorwaarden.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/algemene-voorwaarden.html
         wget -O styles.css https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/styles.css
-        mkdir -p assets/clients
-        wget -O assets/clients/gemeente-almere.png.b64 https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/assets/clients/gemeente-almere.png.b64
-        wget -O assets/clients/hilversum-mediastad.png.b64 https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/assets/clients/hilversum-mediastad.png.b64
-        base64 -d assets/clients/gemeente-almere.png.b64 > assets/clients/gemeente-almere.png
-        base64 -d assets/clients/hilversum-mediastad.png.b64 > assets/clients/hilversum-mediastad.png
-        rm -f assets/clients/*.b64
         nginx -g 'daemon off;'
     labels:
       - traefik.enable=true
