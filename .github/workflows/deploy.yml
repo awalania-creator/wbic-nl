@@ -1,0 +1,83 @@
+name: Deploy WBIC
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-wbic
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, inkoopkompas]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          clean: true
+
+      - name: Pre-deploy disk snapshot
+        run: |
+          echo ">>> Disk usage BEFORE deploy:"
+          df -h / | tail -1 | awk '{printf "  Total: %s | Used: %s (%s) | Free: %s\n", $2, $3, $5, $4}'
+
+      - name: Sync repo into /docker/wbic-nl/
+        run: |
+          set -eo pipefail
+          TARGET=/docker/wbic-nl
+          mkdir -p "$TARGET/backend"
+
+          # Preserve any existing .env on the VPS (TURNSTILE_SECRET, SMTP_*, etc.)
+          if [ -f "$TARGET/.env" ]; then
+            cp "$TARGET/.env" /tmp/wbic-env.bak
+          fi
+
+          # Sync compose + backend code (rsync excludes node_modules + .git)
+          install -m 0644 docker-compose.yml "$TARGET/docker-compose.yml"
+          rsync -a --delete \
+            --exclude='node_modules' \
+            --exclude='.git' \
+            backend/ "$TARGET/backend/"
+
+          # Restore .env if it existed
+          if [ -f /tmp/wbic-env.bak ]; then
+            cp /tmp/wbic-env.bak "$TARGET/.env"
+            rm /tmp/wbic-env.bak
+          fi
+
+          echo ">>> Files synced to $TARGET"
+          ls -la "$TARGET"
+          ls -la "$TARGET/backend"
+
+      - name: Rebuild and restart wbic-nl project
+        working-directory: /docker/wbic-nl
+        run: |
+          set -eo pipefail
+          echo ">>> Tearing down existing containers..."
+          docker compose down --remove-orphans 2>/dev/null || true
+
+          echo ">>> Building wbic-api image..."
+          docker compose build wbic-api
+
+          echo ">>> Starting all services..."
+          docker compose up -d --force-recreate
+
+      - name: Health check
+        if: always()
+        run: |
+          sleep 8
+          echo ">>> Container status:"
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E '(wbic|NAMES)' || true
+          echo ""
+          echo ">>> Disk usage AFTER deploy:"
+          df -h / | tail -1 | awk '{printf "  Total: %s | Used: %s (%s) | Free: %s\n", $2, $3, $5, $4}'
+
+      - name: Docker cleanup (light)
+        if: always()
+        run: |
+          docker container prune -f 2>/dev/null || true
+          docker image prune -f --filter "until=24h" 2>/dev/null || true
+          docker builder prune -f --filter "until=24h" 2>/dev/null || true
+          echo ">>> Cleanup complete"
