@@ -300,6 +300,7 @@ h1,h2,h3,h4 { font-family: var(--font-heading); font-weight: 700; letter-spacing
 
 /* ===== CONTACT ===== */
 .contact-wrap {
+  position: relative; z-index: 5;
   max-width: 1000px;
   margin: 0 auto;
   padding: 60px 24px 100px;
@@ -347,6 +348,11 @@ h1,h2,h3,h4 { font-family: var(--font-heading); font-weight: 700; letter-spacing
 .form-card .form-sub { margin: 0 0 24px; color: var(--muted); font-size: 14px; }
 .field { display: block; margin-bottom: 18px; }
 .field label {
+  display: block; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .12em;
+  color: var(--muted); margin-bottom: 8px;
+}
+.field > span {
   display: block; font-size: 12px; font-weight: 600;
   text-transform: uppercase; letter-spacing: .12em;
   color: var(--muted); margin-bottom: 8px;
