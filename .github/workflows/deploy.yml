@@ -51,6 +51,57 @@ jobs:
           ls -la "$TARGET"
           ls -la "$TARGET/backend"
 
+      - name: Stage logo assets (auto-detect PNG vs base64)
+        run: |
+          set -eo pipefail
+          DEST=/docker/wbic-nl/web-assets/clients
+          mkdir -p "$DEST"
+
+          shopt -s nullglob
+          for src in assets/clients/*.png.b64 assets/clients/*.png; do
+            [ -f "$src" ] || continue
+            base=$(basename "$src")
+            # Strip .b64 if present, target name is .png
+            case "$base" in
+              *.png.b64) out="$DEST/${base%.b64}" ;;
+              *.png)     out="$DEST/$base" ;;
+              *)         continue ;;
+            esac
+
+            # Detect: is the file already a real PNG (89 50 4e 47 0d 0a 1a 0a)?
+            magic=$(head -c 8 "$src" 2>/dev/null | od -An -tx1 | tr -d ' \n' || true)
+            if [ "$magic" = "89504e470d0a1a0a" ]; then
+              echo "  [REAL PNG]   $src -> $out"
+              cp "$src" "$out"
+            else
+              echo "  [BASE64?]    $src -> decoding to $out"
+              if base64 -d "$src" > "$out.tmp" 2>/dev/null; then
+                # Verify decoded result is a real PNG
+                magic2=$(head -c 8 "$out.tmp" 2>/dev/null | od -An -tx1 | tr -d ' \n' || true)
+                if [ "$magic2" = "89504e470d0a1a0a" ]; then
+                  mv "$out.tmp" "$out"
+                  echo "    -> decoded OK"
+                else
+                  echo "    -> decoded but not a PNG (magic=$magic2). Aborting."
+                  rm -f "$out.tmp"
+                  exit 1
+                fi
+              else
+                echo "    -> base64 decode failed. Aborting."
+                rm -f "$out.tmp"
+                exit 1
+              fi
+            fi
+          done
+
+          echo ">>> Staged logo assets in $DEST:"
+          ls -la "$DEST"
+          for f in "$DEST"/*.png; do
+            [ -f "$f" ] || continue
+            echo "  $(basename "$f"): $(stat -c%s "$f") bytes, magic=$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')"
+          done
+        working-directory: ${{ github.workspace }}
+
       - name: Rebuild and restart wbic-nl project
         working-directory: /docker/wbic-nl
         run: |
@@ -70,6 +121,9 @@ jobs:
           sleep 8
           echo ">>> Container status:"
           docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E '(wbic|NAMES)' || true
+          echo ""
+          echo ">>> Verify logo assets are served:"
+          docker exec $(docker ps --format '{{.Names}}' | grep wbic-web | head -1) ls -la /usr/share/nginx/html/assets/clients 2>/dev/null || echo "  (could not list)"
           echo ""
           echo ">>> Disk usage AFTER deploy:"
           df -h / | tail -1 | awk '{printf "  Total: %s | Used: %s (%s) | Free: %s\n", $2, $3, $5, $4}'
