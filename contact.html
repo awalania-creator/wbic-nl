@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact – WBIC</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-75712667"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-75712667');
+  </script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="diensten.html">Diensten</a>
+      <a href="contact.html" class="active">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Contact</h1>
+    <form id="contactForm">
+      <label>Naam <input type="text" name="naam" required maxlength="100" /></label>
+      <label>Onderwerp <input type="text" name="onderwerp" required maxlength="200" /></label>
+      <label>Bericht <textarea name="bericht" required maxlength="5000"></textarea></label>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAB7TVfNVCnvnatK_" data-theme="light"></div>
+      <button type="submit">Verzenden</button>
+    </form>
+  </main>
+  <footer>
+    <p>© 2026 WBIC · KVK 89205529 · <a href="mailto:info@wbic.nl">info@wbic.nl</a></p>
+  </footer>
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = turnstile.getResponse();
+      const data = {
+        naam: e.target.naam.value,
+        onderwerp: e.target.onderwerp.value,
+        bericht: e.target.bericht.value,
+        captchaToken: token
+      };
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          alert('Dank je! We nemen snel contact op ✓');
+          e.target.reset();
+          turnstile.reset();
+        }
+      } catch(err) {
+        alert('Error: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

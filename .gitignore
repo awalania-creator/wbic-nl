@@ -1,0 +1,6 @@
+backend/.env
+.env
+node_modules
+*.tar.gz
+.DS_Store
+.build.log

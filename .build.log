@@ -1,0 +1,20 @@
+2026-04-06T19:37:39.774060 Project directory: /docker/wbic-nl
+2026-04-06T19:37:39.774154 Project URL: https://github.com/awalania-creator/wbic-nl
+2026-04-06T19:37:39.774178 Detected GIT platform: github
+2026-04-06T19:37:39.774934 Trying SSH clone: git@github.com:awalania-creator/wbic-nl.git
+2026-04-06T19:37:39.775135 Trying HTTPS clone: https://github.com/awalania-creator/wbic-nl.git
+2026-04-06T19:37:39.776307 ------------------------------
+2026-04-06T19:37:39.777121 Cloning into '/tmp/hstgr-s041bfdy-dckr-mgr'...
+2026-04-06T19:37:40.204735 ------------------------------
+2026-04-06T19:37:40.205446 Using Docker compose file: /tmp/hstgr-s041bfdy-dckr-mgr/docker-compose.yml
+2026-04-06T19:37:40.209496 Building project
+2026-04-06T19:37:40.211299 ------------------------------
+2026-04-06T19:37:40.307371  Container wbic-nl-wbic-web-1 Creating 
+2026-04-06T19:37:40.386682  Container wbic-nl-wbic-web-1 Created 
+2026-04-06T19:37:40.392570 ------------------------------
+2026-04-06T19:37:40.394903 Deploying project
+2026-04-06T19:37:40.396355 ------------------------------
+2026-04-06T19:37:40.527635  Container wbic-nl-wbic-web-1 Starting 
+2026-04-06T19:37:40.769552  Container wbic-nl-wbic-web-1 Started 
+2026-04-06T19:37:40.791386 ------------------------------
+2026-04-06T19:37:40.791552 Project deployed successfully
