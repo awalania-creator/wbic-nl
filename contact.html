@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FAF9F5" />
+  <link rel="icon" type="image/png" href="https://wbic.nl/wp-content/uploads/2025/06/ashion-Brand-Art-Design-Logo-5.png" />
+  <link rel="apple-touch-icon" href="https://wbic.nl/wp-content/uploads/2025/06/ashion-Brand-Art-Design-Logo-5.png" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://wbic.nl https://challenges.cloudflare.com data:; style-src 'self' https://fonts.bunny.net https://challenges.cloudflare.com 'unsafe-inline'; font-src 'self' https://fonts.bunny.net; script-src 'self' https://challenges.cloudflare.com https://www.googletagmanager.com 'unsafe-inline'; connect-src 'self' https://challenges.cloudflare.com https://www.google-analytics.com https://www.googletagmanager.com; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none';" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Contact – WBIC</title>
+  <meta name="description" content="Neem contact op met WBIC. Laat een bericht achter via het formulier of mail direct naar info@wbic.nl. We denken graag met u mee." />
+
+  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-75712667"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -11,53 +19,215 @@
     gtag('js', new Date());
     gtag('config', 'G-75712667');
   </script>
+
+  <!-- Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="nl_NL" />
+  <meta property="og:title" content="Contact – WBIC" />
+  <meta property="og:description" content="Neem contact op met WBIC voor maatwerk consultancy. Goed bekend met diverse methodieken, raamwerken en best practices." />
+  <meta property="og:image" content="https://wbic.nl/wp-content/uploads/2025/06/ashion-Brand-Art-Design-Logo-5.png" />
+  <meta property="og:url" content="https://wbic.nl/contact/" />
+
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+  <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700|quicksand:500,600,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="diensten.html">Diensten</a>
-      <a href="contact.html" class="active">Contact</a>
+
+  <a href="#hoofdinhoud" class="skip">Direct naar inhoud</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="stage" role="banner">
+    <div class="bg-mesh" aria-hidden="true"></div>
+    <div class="bg-aurora" aria-hidden="true"></div>
+    <div class="bg-orb a" aria-hidden="true"></div>
+    <div class="bg-orb b" aria-hidden="true"></div>
+    <div class="bg-orb c" aria-hidden="true"></div>
+
+    <nav class="nav" aria-label="Hoofdnavigatie">
+      <a href="index.html" class="brand" aria-label="WBIC home">
+        <img src="https://wbic.nl/wp-content/uploads/2025/06/ashion-Brand-Art-Design-Logo-5.png" alt="WBIC" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="diensten.html">Diensten</a></li>
+        <li><a href="contact.html" class="active" aria-current="page">Contact</a></li>
+      </ul>
     </nav>
+
+    <main id="hoofdinhoud">
+      <section class="hero compact" aria-labelledby="page-title">
+        <span class="eyebrow">Contact</span>
+        <h1 id="page-title">
+          Kom in contact <span class="grad">met ons</span>
+        </h1>
+        <p class="lead">
+          Heeft u een vraag of wilt u sparren over een project? Laat een bericht achter — we reageren snel en denken graag met u mee.
+        </p>
+      </section>
+
+      <div class="contact-wrap">
+
+        <div class="contact-info">
+          <h2>Direct contact</h2>
+          <p>Liever direct mailen of bellen? Onderstaande gegevens komen rechtstreeks bij ons binnen.</p>
+          <ul class="contact-meta">
+            <li>
+              <span class="ico" aria-hidden="true">@</span>
+              <span>
+                <span class="label">E-mail</span>
+                <span class="value"><a href="mailto:info@wbic.nl">info@wbic.nl</a></span>
+              </span>
+            </li>
+            <li>
+              <span class="ico" aria-hidden="true">KVK</span>
+              <span>
+                <span class="label">Kamer van Koophandel</span>
+                <span class="value">89205529</span>
+              </span>
+            </li>
+            <li>
+              <span class="ico" aria-hidden="true">in</span>
+              <span>
+                <span class="label">LinkedIn</span>
+                <span class="value"><a href="https://www.linkedin.com/company/74770542" rel="noopener noreferrer" target="_blank">WBIC op LinkedIn</a></span>
+              </span>
+            </li>
+            <li>
+              <span class="ico" aria-hidden="true">NL</span>
+              <span>
+                <span class="label">Werkgebied</span>
+                <span class="value">Nederland — overheid, semi-overheid &amp; private sector</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <form class="form-card" aria-labelledby="form-title" novalidate>
+          <h3 id="form-title">Stuur ons een bericht</h3>
+          <p class="form-sub">Vul het formulier in en we nemen zo snel mogelijk contact op.</p>
+
+          <div class="field-row">
+            <label class="field">
+              <span>Naam</span>
+              <input type="text" name="naam" autocomplete="name" required maxlength="100" placeholder="Uw naam" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Onderwerp</span>
+            <input type="text" name="onderwerp" required maxlength="200" placeholder="Waar gaat het over?" />
+          </label>
+
+          <label class="field">
+            <span>Bericht</span>
+            <textarea name="bericht" required maxlength="5000" placeholder="Vertel ons kort waar u mee bezig bent..."></textarea>
+          </label>
+
+          <!-- Cloudflare Turnstile CAPTCHA -->
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAB7TVfNVCnvnatK_" data-theme="light"></div>
+
+          <button type="submit">Verzenden →</button>
+        </form>
+
+      </div>
+    </main>
   </header>
-  <main>
-    <h1>Contact</h1>
-    <form id="contactForm">
-      <label>Naam <input type="text" name="naam" required maxlength="100" /></label>
-      <label>Onderwerp <input type="text" name="onderwerp" required maxlength="200" /></label>
-      <label>Bericht <textarea name="bericht" required maxlength="5000"></textarea></label>
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAAB7TVfNVCnvnatK_" data-theme="light"></div>
-      <button type="submit">Verzenden</button>
-    </form>
-  </main>
+
+  <!-- ===== FOOTER ===== -->
   <footer>
-    <p>© 2026 WBIC · KVK 89205529 · <a href="mailto:info@wbic.nl">info@wbic.nl</a></p>
+    © <span id="year"></span> WBIC · KVK 89205529 ·
+    <a href="mailto:info@wbic.nl">info@wbic.nl</a> ·
+    <a href="algemene-voorwaarden.html">Algemene Voorwaarden</a> ·
+    <a href="https://www.linkedin.com/company/74770542" rel="noopener noreferrer" target="_blank">LinkedIn</a>
   </footer>
+
   <script>
-    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Form submission handler with Turnstile CAPTCHA and API submission
+    document.querySelector('.form-card').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const token = turnstile.getResponse();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+
+      // Get Turnstile token
+      const turnstileToken = turnstile.getResponse();
+      if (!turnstileToken) {
+        alert('Please complete the CAPTCHA');
+        return;
+      }
+
+      // Get form data
       const data = {
-        naam: e.target.naam.value,
-        onderwerp: e.target.onderwerp.value,
-        bericht: e.target.bericht.value,
-        captchaToken: token
+        naam: form.querySelector('input[name="naam"]').value,
+        onderwerp: form.querySelector('input[name="onderwerp"]').value,
+        bericht: form.querySelector('textarea[name="bericht"]').value,
+        captchaToken: turnstileToken
       };
+
+      // Validate client-side
+      if (data.naam.length > 100) {
+        alert('Naam is te lang (max 100 characters)');
+        return;
+      }
+      if (data.onderwerp.length > 200) {
+        alert('Onderwerp is te lang (max 200 characters)');
+        return;
+      }
+      if (data.bericht.length > 5000) {
+        alert('Bericht is te lang (max 5000 characters)');
+        return;
+      }
+
+      // Show loading state
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = 'Verzenden...';
+
       try {
-        const res = await fetch('/api/contact', {
+        // Send to backend
+        const response = await fetch('/api/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-        if (res.ok) {
-          alert('Dank je! We nemen snel contact op ✓');
-          e.target.reset();
-          turnstile.reset();
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          // Success
+          btn.textContent = 'Dank je! We nemen snel contact op ✓';
+          form.reset();
+          turnstile.reset(); // Reset CAPTCHA widget
+
+          // GA4 event tracking
+          gtag('event', 'contact_form_submit', {
+            'event_category': 'engagement',
+            'event_label': 'contact_form'
+          });
+
+          // Reset button after 3 seconds
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+          }, 3000);
+        } else {
+          // Error from backend
+          const errorMsg = result.error || 'Something went wrong';
+          alert(`Error: ${errorMsg}`);
+          btn.textContent = originalText;
+          btn.disabled = false;
+          turnstile.reset(); // Reset CAPTCHA for retry
         }
-      } catch(err) {
-        alert('Error: ' + err.message);
+      } catch (error) {
+        console.error('Submission error:', error);
+        alert('Network error. Please try again.');
+        btn.textContent = originalText;
+        btn.disabled = false;
+        turnstile.reset();
       }
     });
   </script>
