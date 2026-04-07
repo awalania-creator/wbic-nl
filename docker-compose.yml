@@ -1,54 +1,25 @@
-services:
-  wbic-web:
-    image: nginx:alpine
-    restart: always
-    command:
-      - /bin/sh
-      - -c
-      - |
-        cd /usr/share/nginx/html
-        wget -O index.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/index.html
-        wget -O diensten.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/diensten.html
-        wget -O contact.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/contact.html
-        wget -O algemene-voorwaarden.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/algemene-voorwaarden.html
-        wget -O styles.css https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/styles.css
-        nginx -g 'daemon off;'
-    labels:
-      - traefik.enable=true
-      - "traefik.http.routers.wbic.rule=Host(`wbic.aiwbic.cloud`)"
-      - traefik.http.routers.wbic.tls=true
-      - traefik.http.routers.wbic.entrypoints=web,websecure
-      - traefik.http.routers.wbic.tls.certresolver=mytlschallenge
-      - traefik.http.services.wbic.loadbalancer.server.port=80
-    networks:
-      - n8n_default
+version: '3.8'
 
-  wbic-api:
-    build: ./backend
-    restart: always
-    # NOTE: Set deze env vars handmatig op de VPS in /docker/wbic-nl/.env
-    # of via de Hostinger panel "Environment Variables" voor dit project:
-    #   TURNSTILE_SECRET=...
-    #   SMTP_HOST=smtp.example.com
-    #   SMTP_PORT=587
-    #   SMTP_FROM=info@wbic.nl
-    #   ALLOWED_ORIGINS=https://wbic.aiwbic.cloud,https://wbic.nl
+services:
+  wbic-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wbic-backend
     environment:
       - PORT=3000
-      - TURNSTILE_SECRET=${TURNSTILE_SECRET:-}
-      - SMTP_HOST=${SMTP_HOST:-}
-      - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_FROM=${SMTP_FROM:-info@wbic.nl}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://wbic.aiwbic.cloud}
-    labels:
-      - traefik.enable=true
-      - "traefik.http.routers.wbic-api.rule=Host(`wbic.aiwbic.cloud`) && PathPrefix(`/api`)"
-      - traefik.http.routers.wbic-api.entrypoints=websecure
-      - traefik.http.routers.wbic-api.tls=true
-      - traefik.http.routers.wbic-api.tls.certresolver=mytlschallenge
-      - traefik.http.services.wbic-api.loadbalancer.server.port=3000
+      - NODE_ENV=production
+      - SMTP_HOST=localhost
+      - SMTP_PORT=25
+      - SMTP_FROM=info@wbic.nl
+      - CLOUDFLARE_TURNSTILE_SECRET=${CLOUDFLARE_TURNSTILE_SECRET}
     networks:
       - n8n_default
+    restart: always
+    expose:
+      - 3000
+    volumes:
+      - ./backend/node_modules:/app/node_modules
 
 networks:
   n8n_default:
