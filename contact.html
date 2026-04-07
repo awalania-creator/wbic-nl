@@ -114,7 +114,16 @@
               <span>Naam</span>
               <input type="text" name="naam" autocomplete="name" required maxlength="100" placeholder="Uw naam" />
             </label>
+            <label class="field">
+              <span>E-mail</span>
+              <input type="email" name="email" autocomplete="email" required maxlength="150" placeholder="u@voorbeeld.nl" />
+            </label>
           </div>
+
+          <label class="field">
+            <span>Bedrijf (optioneel)</span>
+            <input type="text" name="bedrijf" autocomplete="organization" maxlength="150" placeholder="Uw organisatie" />
+          </label>
 
           <label class="field">
             <span>Onderwerp</span>
@@ -127,7 +136,7 @@
           </label>
 
           <!-- Cloudflare Turnstile CAPTCHA -->
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAB7TVfNVCnvnatK_" data-theme="light"></div>
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAB7tx38e2vvqgQU8" data-theme="light"></div>
 
           <button type="submit">Verzenden →</button>
         </form>
@@ -138,7 +147,7 @@
 
   <!-- ===== FOOTER ===== -->
   <footer>
-    © <span id="year"></span> WBIC · KVK 89205529 ·
+    © <span id="year"></span> WBIC b.v. · KVK 89205529 ·
     <a href="mailto:info@wbic.nl">info@wbic.nl</a> ·
     <a href="algemene-voorwaarden.html">Algemene Voorwaarden</a> ·
     <a href="https://www.linkedin.com/company/74770542" rel="noopener noreferrer" target="_blank">LinkedIn</a>
@@ -163,6 +172,8 @@
       // Get form data
       const data = {
         naam: form.querySelector('input[name="naam"]').value,
+        email: form.querySelector('input[name="email"]').value,
+        bedrijf: form.querySelector('input[name="bedrijf"]').value,
         onderwerp: form.querySelector('input[name="onderwerp"]').value,
         bericht: form.querySelector('textarea[name="bericht"]').value,
         captchaToken: turnstileToken
@@ -171,6 +182,10 @@
       // Validate client-side
       if (data.naam.length > 100) {
         alert('Naam is te lang (max 100 characters)');
+        return;
+      }
+      if (data.email.length > 150) {
+        alert('E-mail is te lang (max 150 characters)');
         return;
       }
       if (data.onderwerp.length > 200) {
