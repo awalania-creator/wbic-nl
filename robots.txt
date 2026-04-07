@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Block the legacy staging host from being indexed once migration is live.
+# (Served from the same container; staging host should 301 to wbic.nl after cutover.)
+
+Sitemap: https://wbic.nl/sitemap.xml
