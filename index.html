@@ -32,6 +32,61 @@
   <link rel="preload" as="image" href="https://wbic.nl/wp-content/uploads/2025/06/ashion-Brand-Art-Design-Logo-5.png" />
   <link rel="stylesheet" href="styles.css" />
 
+  <style>
+    /* ===== Client logo marquee carousel ===== */
+    .clients {
+      position: relative;
+      padding: 60px 24px 80px;
+      text-align: center;
+    }
+    .clients h2 {
+      font-family: 'Quicksand', sans-serif;
+      font-size: clamp(20px, 2.4vw, 28px);
+      font-weight: 600;
+      color: #3a342a;
+      margin: 0 0 32px;
+      letter-spacing: .02em;
+    }
+    .logo-marquee {
+      position: relative;
+      max-width: 1100px;
+      margin: 0 auto;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%);
+              mask-image: linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%);
+    }
+    .logo-track {
+      display: flex;
+      gap: 64px;
+      width: max-content;
+      align-items: center;
+      animation: marquee 30s linear infinite;
+    }
+    .logo-marquee:hover .logo-track { animation-play-state: paused; }
+    .logo-track img {
+      height: 64px;
+      width: auto;
+      max-width: 220px;
+      object-fit: contain;
+      filter: grayscale(100%);
+      opacity: .7;
+      transition: filter .35s ease, opacity .35s ease, transform .35s ease;
+      flex-shrink: 0;
+    }
+    .logo-track img:hover {
+      filter: grayscale(0%);
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .logo-track { animation: none; }
+    }
+  </style>
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -96,7 +151,7 @@
       <div class="trust">
         <div class="label">Vertrouwd door publieke en private organisaties</div>
         <div class="row">
-          <span>Overheid</span>
+          <span>Ruime ervaring bij overheidsorganisaties, op de hoogte van de laatste ontwikkelingen</span>
           <span>Semi-overheid</span>
           <span>Commerciële sector</span>
           <span>20+ jaar ervaring</span>
@@ -138,6 +193,23 @@
     <a class="btn btn-primary" href="contact.html">Plan een kennismaking <span aria-hidden="true">→</span></a>
   </aside>
 
+  <!-- ===== CLIENT LOGO CAROUSEL ===== -->
+  <section class="clients" aria-labelledby="clients-title">
+    <h2 id="clients-title">Vertrouwd door</h2>
+    <div class="logo-marquee" aria-label="Klanten van WBIC">
+      <div class="logo-track">
+        <img src="assets/clients/gemeente-almere.png" alt="Gemeente Almere" loading="lazy" />
+        <img src="assets/clients/hilversum-mediastad.png" alt="Hilversum Mediastad" loading="lazy" />
+        <img src="assets/clients/gemeente-almere.png" alt="Gemeente Almere" loading="lazy" />
+        <img src="assets/clients/hilversum-mediastad.png" alt="Hilversum Mediastad" loading="lazy" />
+        <img src="assets/clients/gemeente-almere.png" alt="" aria-hidden="true" loading="lazy" />
+        <img src="assets/clients/hilversum-mediastad.png" alt="" aria-hidden="true" loading="lazy" />
+        <img src="assets/clients/gemeente-almere.png" alt="" aria-hidden="true" loading="lazy" />
+        <img src="assets/clients/hilversum-mediastad.png" alt="" aria-hidden="true" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
   <!-- ===== FOOTER ===== -->
   <footer>
     © <span id="year"></span> WBIC b.v. · KVK 89205529 ·
@@ -162,15 +234,13 @@
       const navLogo   = document.querySelector('.nav .brand img');
       if (!introLogo || !navLogo) return;
 
-      // Glide timings (must stay aligned with the CSS intro)
       const GLIDE_DELAY    = 6000;
       const GLIDE_DURATION = 1400;
-      const FADE_DELAY     = GLIDE_DELAY + GLIDE_DURATION - 100; // 7300ms
+      const FADE_DELAY     = GLIDE_DELAY + GLIDE_DURATION - 100;
       const FADE_DURATION  = 350;
 
       function runGlide() {
         const r = navLogo.getBoundingClientRect();
-        // Skip if nav-logo not laid out yet
         if (!r.width) return;
 
         const targetTop  = r.top + 'px';
@@ -199,7 +269,6 @@
           fill: 'forwards'
         });
 
-        // Fade out intro-logo as the real nav-logo fades in
         introLogo.animate(
           [{ opacity: 1 }, { opacity: 0 }],
           { duration: FADE_DURATION, delay: FADE_DELAY, fill: 'forwards' }
