@@ -4,17 +4,23 @@ services:
     restart: always
     volumes:
       - /docker/wbic-nl/web-assets:/usr/share/nginx/html/assets:ro
+      - /docker/wbic-nl/html:/srv/html:ro
     command:
       - /bin/sh
       - -c
       - |
-        cd /usr/share/nginx/html
-        wget -O index.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/index.html
-        wget -O diensten.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/diensten.html
-        wget -O contact.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/contact.html
-        wget -O algemene-voorwaarden.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/algemene-voorwaarden.html
-        wget -O styles.css https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/styles.css
-        nginx -g 'daemon off;'
+        set -e
+        echo "[wbic-web] seeding HTML from /srv/html"
+        if ls /srv/html/*.html >/dev/null 2>&1; then
+          cp /srv/html/*.html /usr/share/nginx/html/
+        else
+          echo "[wbic-web] WARN: no HTML files in /srv/html (check deploy.yml Stage HTML step)"
+        fi
+        if [ -f /srv/html/styles.css ]; then
+          cp /srv/html/styles.css /usr/share/nginx/html/styles.css
+        fi
+        ls -la /usr/share/nginx/html
+        exec nginx -g 'daemon off;'
     labels:
       - traefik.enable=true
       - "traefik.http.routers.wbic.rule=Host(`wbic.nl`) || Host(`www.wbic.nl`)"
@@ -22,6 +28,12 @@ services:
       - traefik.http.routers.wbic.entrypoints=web,websecure
       - traefik.http.routers.wbic.tls.certresolver=mytlschallenge
       - traefik.http.services.wbic.loadbalancer.server.port=80
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - n8n_default
 
@@ -49,6 +61,12 @@ services:
       - traefik.http.routers.wbic-api.tls=true
       - traefik.http.routers.wbic-api.tls.certresolver=mytlschallenge
       - traefik.http.services.wbic-api.loadbalancer.server.port=3000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - n8n_default
 

@@ -27,7 +27,7 @@ jobs:
         run: |
           set -eo pipefail
           TARGET=/docker/wbic-nl
-          mkdir -p "$TARGET/backend"
+          mkdir -p "$TARGET/backend" "$TARGET/html" "$TARGET/web-assets/clients"
 
           # Preserve any existing .env on the VPS (TURNSTILE_SECRET, SMTP_*, etc.)
           if [ -f "$TARGET/.env" ]; then
@@ -51,6 +51,28 @@ jobs:
           ls -la "$TARGET"
           ls -la "$TARGET/backend"
 
+      - name: Stage root HTML + CSS into /docker/wbic-nl/html
+        run: |
+          set -eo pipefail
+          DEST=/docker/wbic-nl/html
+          mkdir -p "$DEST"
+          staged=0
+          for f in index.html diensten.html contact.html algemene-voorwaarden.html styles.css; do
+            if [ -f "$f" ]; then
+              install -m 0644 "$f" "$DEST/$f"
+              echo "  [HTML] $f -> $DEST/$f ($(stat -c%s "$DEST/$f") bytes)"
+              staged=$((staged+1))
+            else
+              echo "  WARN: $f missing in repo root"
+            fi
+          done
+          if [ "$staged" -eq 0 ]; then
+            echo "FATAL: no HTML/CSS staged — aborting deploy to avoid serving blank site"
+            exit 1
+          fi
+          echo ">>> $DEST contents:"
+          ls -la "$DEST"
+
       - name: Stage logo assets (auto-detect PNG vs base64)
         run: |
           set -eo pipefail
@@ -61,14 +83,12 @@ jobs:
           for src in assets/clients/*.png.b64 assets/clients/*.png; do
             [ -f "$src" ] || continue
             base=$(basename "$src")
-            # Strip .b64 if present, target name is .png
             case "$base" in
               *.png.b64) out="$DEST/${base%.b64}" ;;
               *.png)     out="$DEST/$base" ;;
               *)         continue ;;
             esac
 
-            # Detect: is the file already a real PNG (89 50 4e 47 0d 0a 1a 0a)?
             magic=$(head -c 8 "$src" 2>/dev/null | od -An -tx1 | tr -d ' \n' || true)
             if [ "$magic" = "89504e470d0a1a0a" ]; then
               echo "  [REAL PNG]   $src -> $out"
@@ -76,7 +96,6 @@ jobs:
             else
               echo "  [BASE64?]    $src -> decoding to $out"
               if base64 -d "$src" > "$out.tmp" 2>/dev/null; then
-                # Verify decoded result is a real PNG
                 magic2=$(head -c 8 "$out.tmp" 2>/dev/null | od -An -tx1 | tr -d ' \n' || true)
                 if [ "$magic2" = "89504e470d0a1a0a" ]; then
                   mv "$out.tmp" "$out"
@@ -96,10 +115,6 @@ jobs:
 
           echo ">>> Staged logo assets in $DEST:"
           ls -la "$DEST"
-          for f in "$DEST"/*.png; do
-            [ -f "$f" ] || continue
-            echo "  $(basename "$f"): $(stat -c%s "$f") bytes, magic=$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')"
-          done
         working-directory: ${{ github.workspace }}
 
       - name: Stage SVG brand assets
@@ -125,18 +140,16 @@ jobs:
           ls -la "$DEST"
         working-directory: ${{ github.workspace }}
 
-      - name: Rebuild and restart wbic-nl project
+      - name: Build + restart wbic-nl (no downtime window)
         working-directory: /docker/wbic-nl
         run: |
           set -eo pipefail
-          echo ">>> Tearing down existing containers..."
-          docker compose down --remove-orphans 2>/dev/null || true
-
           echo ">>> Building wbic-api image..."
           docker compose build wbic-api
 
-          echo ">>> Starting all services..."
-          docker compose up -d --force-recreate
+          echo ">>> Applying stack (force-recreate, remove orphans)..."
+          # NB: no explicit 'down' — if anything above fails, old containers keep serving.
+          docker compose up -d --force-recreate --remove-orphans
 
       - name: Health check
         if: always()
@@ -147,14 +160,14 @@ jobs:
           echo ""
           WEB=$(docker ps --format '{{.Names}}' | grep wbic-web | head -1)
           if [ -n "$WEB" ]; then
-            echo ">>> /usr/share/nginx/html/assets in $WEB:"
-            docker exec "$WEB" ls -la /usr/share/nginx/html/assets 2>/dev/null || echo "  (could not list assets)"
+            echo ">>> /usr/share/nginx/html in $WEB:"
+            docker exec "$WEB" ls -la /usr/share/nginx/html 2>/dev/null || echo "  (could not list)"
             echo ""
-            echo ">>> /usr/share/nginx/html/assets/clients in $WEB:"
-            docker exec "$WEB" ls -la /usr/share/nginx/html/assets/clients 2>/dev/null || echo "  (could not list clients)"
-            echo ""
-            echo ">>> logo-wbic.svg served by nginx (internal curl):"
+            echo ">>> logo-wbic.svg served by nginx (internal wget):"
             docker exec "$WEB" sh -c 'wget -qO- --server-response http://127.0.0.1/assets/logo-wbic.svg 2>&1 | head -5' || echo "  (wget failed)"
+            echo ""
+            echo ">>> index.html served by nginx (internal wget):"
+            docker exec "$WEB" sh -c 'wget -qO- --server-response http://127.0.0.1/ 2>&1 | head -5' || echo "  (wget failed)"
           fi
           echo ""
           echo ">>> Disk usage AFTER deploy:"
