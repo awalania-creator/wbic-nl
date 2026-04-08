@@ -102,6 +102,29 @@ jobs:
           done
         working-directory: ${{ github.workspace }}
 
+      - name: Stage SVG brand assets
+        run: |
+          set -eo pipefail
+          DEST=/docker/wbic-nl/web-assets
+          mkdir -p "$DEST"
+
+          shopt -s nullglob
+          staged=0
+          for src in assets/*.svg; do
+            [ -f "$src" ] || continue
+            base=$(basename "$src")
+            install -m 0644 "$src" "$DEST/$base"
+            echo "  [SVG] $src -> $DEST/$base ($(stat -c%s "$DEST/$base") bytes)"
+            staged=$((staged+1))
+          done
+          if [ "$staged" -eq 0 ]; then
+            echo "  WARN: no SVGs found under assets/*.svg"
+          fi
+
+          echo ">>> web-assets contents:"
+          ls -la "$DEST"
+        working-directory: ${{ github.workspace }}
+
       - name: Rebuild and restart wbic-nl project
         working-directory: /docker/wbic-nl
         run: |
@@ -122,8 +145,17 @@ jobs:
           echo ">>> Container status:"
           docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E '(wbic|NAMES)' || true
           echo ""
-          echo ">>> Verify logo assets are served:"
-          docker exec $(docker ps --format '{{.Names}}' | grep wbic-web | head -1) ls -la /usr/share/nginx/html/assets/clients 2>/dev/null || echo "  (could not list)"
+          WEB=$(docker ps --format '{{.Names}}' | grep wbic-web | head -1)
+          if [ -n "$WEB" ]; then
+            echo ">>> /usr/share/nginx/html/assets in $WEB:"
+            docker exec "$WEB" ls -la /usr/share/nginx/html/assets 2>/dev/null || echo "  (could not list assets)"
+            echo ""
+            echo ">>> /usr/share/nginx/html/assets/clients in $WEB:"
+            docker exec "$WEB" ls -la /usr/share/nginx/html/assets/clients 2>/dev/null || echo "  (could not list clients)"
+            echo ""
+            echo ">>> logo-wbic.svg served by nginx (internal curl):"
+            docker exec "$WEB" sh -c 'wget -qO- --server-response http://127.0.0.1/assets/logo-wbic.svg 2>&1 | head -5' || echo "  (wget failed)"
+          fi
           echo ""
           echo ">>> Disk usage AFTER deploy:"
           df -h / | tail -1 | awk '{printf "  Total: %s | Used: %s (%s) | Free: %s\n", $2, $3, $5, $4}'
