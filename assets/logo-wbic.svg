@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" role="img" aria-label="WBIC advies en realisatie">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 370" role="img" aria-label="WBIC advies en realisatie">
   <title>WBIC</title>
-  <text x="0" y="40" font-family="Quicksand, sans-serif" font-weight="600" font-size="34" fill="#141413" letter-spacing="1">WBIC</text>
-  <text x="2" y="54" font-family="Inter, sans-serif" font-weight="400" font-size="10" fill="#6b6b6b" letter-spacing="0.3">advies &amp; realisatie</text>
+  <!-- Beige field -->
+  <rect x="0" y="0" width="310" height="270" fill="#C9B48E"/>
+  <!-- Orange vertical accent bar -->
+  <rect x="310" y="0" width="30" height="270" fill="#E85423"/>
+  <!-- Black baseline bar -->
+  <rect x="0" y="270" width="340" height="100" fill="#141413"/>
+  <!-- wbic wordmark, straddling beige/black boundary -->
+  <text x="12" y="300"
+        font-family="'Quicksand','Helvetica Neue',Arial,sans-serif"
+        font-weight="700"
+        font-size="140"
+        fill="#FFFFFF"
+        letter-spacing="-3">wbic</text>
+  <!-- Orange '&' accent on the black bar -->
+  <text x="150" y="345"
+        font-family="'Quicksand','Helvetica Neue',Arial,sans-serif"
+        font-weight="400"
+        font-size="30"
+        fill="#E85423">&amp;</text>
 </svg>
