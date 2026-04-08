@@ -3,7 +3,7 @@ services:
     image: nginx:alpine
     restart: always
     volumes:
-      - /docker/wbic-nl/web-assets/clients:/usr/share/nginx/html/assets/clients:ro
+      - /docker/wbic-nl/web-assets:/usr/share/nginx/html/assets:ro
     command:
       - /bin/sh
       - -c
@@ -14,8 +14,6 @@ services:
         wget -O contact.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/contact.html
         wget -O algemene-voorwaarden.html https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/algemene-voorwaarden.html
         wget -O styles.css https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/styles.css
-        mkdir -p assets
-        wget -O assets/logo-wbic.svg https://raw.githubusercontent.com/awalania-creator/wbic-nl/main/assets/logo-wbic.svg
         nginx -g 'daemon off;'
     labels:
       - traefik.enable=true
