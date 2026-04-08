@@ -11,6 +11,27 @@
   <title>WBIC – Slimme consultancy voor publieke vraagstukken</title>
   <meta name="description" content="WBIC helpt publieke organisaties hun digitale dienstverlening te verbeteren — van strategie en aanbesteding tot realisatie. We adviseren niet alleen, we bouwen mee. 20+ jaar ervaring bij de overheid." />
 
+  <!-- ============================================================
+       Intro-gate: voorkomt FOUC. Zet <html class="intro-skip"> voor
+       render wanneer de bezoeker de intro al heeft gezien in deze
+       tab-sessie, of wanneer prefers-reduced-motion actief is.
+       Bij eerste bezoek wordt direct de sessionStorage-flag gezet.
+       ============================================================ -->
+  <script>
+    (function () {
+      try {
+        var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var seen = false;
+        try { seen = sessionStorage.getItem('wbic_intro_seen') === '1'; } catch (e) {}
+        if (reduced || seen) {
+          document.documentElement.classList.add('intro-skip');
+        } else {
+          try { sessionStorage.setItem('wbic_intro_seen', '1'); } catch (e) {}
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-75712667"></script>
   <script>
@@ -239,6 +260,7 @@
        ============================================================ */
     (function () {
       if (!document.body.classList.contains('has-intro')) return;
+      if (document.documentElement.classList.contains('intro-skip')) return;
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       const introLogo = document.querySelector('.intro-logo');
