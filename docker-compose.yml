@@ -17,7 +17,7 @@ services:
         nginx -g 'daemon off;'
     labels:
       - traefik.enable=true
-      - "traefik.http.routers.wbic.rule=Host(`wbic.aiwbic.cloud`)"
+      - "traefik.http.routers.wbic.rule=Host(`wbic.nl`) || Host(`www.wbic.nl`)"
       - traefik.http.routers.wbic.tls=true
       - traefik.http.routers.wbic.entrypoints=web,websecure
       - traefik.http.routers.wbic.tls.certresolver=mytlschallenge
@@ -33,7 +33,7 @@ services:
     #   SMTP_HOST=smtp.example.com
     #   SMTP_PORT=587
     #   SMTP_FROM=info@wbic.nl
-    #   ALLOWED_ORIGINS=https://wbic.aiwbic.cloud,https://wbic.nl
+    #   ALLOWED_ORIGINS=https://wbic.nl,https://www.wbic.nl
     environment:
       - PORT=3000
       - TURNSTILE_SECRET=${TURNSTILE_SECRET:-}
@@ -41,10 +41,10 @@ services:
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_FROM=${SMTP_FROM:-info@wbic.nl}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://wbic.aiwbic.cloud}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://wbic.nl,https://www.wbic.nl}
     labels:
       - traefik.enable=true
-      - "traefik.http.routers.wbic-api.rule=Host(`wbic.aiwbic.cloud`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.wbic-api.rule=(Host(`wbic.nl`) || Host(`www.wbic.nl`)) && PathPrefix(`/api`)"
       - traefik.http.routers.wbic-api.entrypoints=websecure
       - traefik.http.routers.wbic-api.tls=true
       - traefik.http.routers.wbic-api.tls.certresolver=mytlschallenge
