@@ -566,3 +566,23 @@ body.has-intro footer { opacity: 0; animation: pageFade 1.0s ease 7.5s forwards;
   body.has-intro .cta-strip,
   body.has-intro footer { opacity: 1 !important; transform: none !important; animation: none !important; }
 }
+
+/* ============================================================
+   INTRO SKIP — 1x per sessie
+   Wanneer het head-script (in index.html) <html class="intro-skip">
+   heeft gezet (sessionStorage 'wbic_intro_seen' of reduced motion),
+   overslaan we de intro-overlay volledig en tonen direct de eindstaat.
+   Geen FOUC, geen flicker, geen transition.
+   ============================================================ */
+html.intro-skip body.has-intro .intro-iris,
+html.intro-skip body.has-intro .intro-glow,
+html.intro-skip body.has-intro .intro-ring,
+html.intro-skip body.has-intro .intro-logo,
+html.intro-skip body.has-intro .intro-text { display: none !important; }
+html.intro-skip body.has-intro .nav .brand img,
+html.intro-skip body.has-intro .nav-links,
+html.intro-skip body.has-intro .hero,
+html.intro-skip body.has-intro .trust,
+html.intro-skip body.has-intro .section,
+html.intro-skip body.has-intro .cta-strip,
+html.intro-skip body.has-intro footer { opacity: 1 !important; transform: none !important; animation: none !important; }
